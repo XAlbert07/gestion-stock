@@ -1,0 +1,10 @@
+const express = require("express");
+const c = require("./customer.controller");
+const requireAuth = require("../../middlewares/require-auth");
+const r = express.Router();
+r.use(requireAuth);
+r.get("/types", c.types);
+r.post("/types", c.createType);
+r.get("/", c.customers);
+r.post("/", c.createCustomer);
+module.exports = r;

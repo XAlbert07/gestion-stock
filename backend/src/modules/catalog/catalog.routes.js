@@ -1,0 +1,12 @@
+const express = require("express");
+const controller = require("./catalog.controller");
+const requireAuth = require("../../middlewares/require-auth");
+const router = express.Router();
+router.use(["/categories", "/units"], requireAuth);
+router.get("/categories", controller.getCategories);
+router.post("/categories", controller.createCategory);
+router.patch("/categories/:id", controller.updateCategory);
+router.get("/units", controller.getUnits);
+router.post("/units", controller.createUnit);
+router.patch("/units/:id", controller.updateUnit);
+module.exports = router;

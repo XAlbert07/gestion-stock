@@ -1,0 +1,12 @@
+const express = require("express");
+const controller = require("./receipt.controller");
+const requireAuth = require("../../middlewares/require-auth");
+const router = express.Router();
+router.use(requireAuth);
+router.get("/", controller.list);
+router.post("/", controller.create);
+router.get("/:id", controller.get);
+router.get("/:id/items", controller.items);
+router.post("/:id/items", controller.addItem);
+router.post("/:id/complete", controller.complete);
+module.exports = router;

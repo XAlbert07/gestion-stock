@@ -1,0 +1,14 @@
+const express = require("express");
+const controller = require("./inventory.controller");
+const requireAuth = require("../../middlewares/require-auth");
+const router = express.Router();
+router.use(requireAuth);
+router.get("/summary", controller.getDashboardSummary);
+router.get("/products", controller.listStockProducts);
+router.get("/products/:productId/stock", controller.getStock);
+router.get("/products/:productId/movements", controller.getMovements);
+router.post("/adjustments", controller.createAdjustment);
+router.post("/opening-stock", controller.createOpeningStock);
+router.post("/counts", controller.createStockCount);
+router.post("/operations/:operationId/cancel", controller.cancelOperation);
+module.exports = router;
