@@ -1,0 +1,57 @@
+databases:
+  - name: gestion-stock-db
+    plan: free
+    databaseName: gestion_stock
+    user: gestion_stock_user
+
+services:
+  - type: web
+    name: gestion-stock-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci
+    # Les migrations et la création de l'admin sont idempotentes :
+    # elles peuvent tourner à chaque démarrage (pas de shell sur le plan gratuit).
+    startCommand: npm run db:migrate && npm run bootstrap:admin && npm start
+    healthCheckPath: /api/health/ready
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        fromDatabase:
+          name: gestion-stock-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: gestion-stock-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: gestion-stock-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: gestion-stock-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: gestion-stock-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 8h
+      - key: TRUST_PROXY_HOPS
+        value: 1
+      # À saisir dans le dashboard Render au premier déploiement (non stockés dans Git)
+      - key: ADMIN_FIRST_NAME
+        sync: false
+      - key: ADMIN_LAST_NAME
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
