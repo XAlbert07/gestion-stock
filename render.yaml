@@ -13,7 +13,7 @@ services:
     buildCommand: npm ci
     # Les migrations et la création de l'admin sont idempotentes :
     # elles peuvent tourner à chaque démarrage (pas de shell sur le plan gratuit).
-    startCommand: npm run db:migrate && npm run bootstrap:admin && npm start
+    startCommand: npm run db:migrate && npm start
     healthCheckPath: /api/health/ready
     envVars:
       - key: NODE_VERSION
