@@ -11,9 +11,10 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm ci
-    # Les migrations et la création de l'admin sont idempotentes :
-    # elles peuvent tourner à chaque démarrage (pas de shell sur le plan gratuit).
-    startCommand: npm run db:migrate && npm start
+    # Migrations à chaque démarrage. Le seed de démonstration ne s'exécute que si
+    # SEED_DEMO=true ET que la base ne contient aucun produit ; un échec du seed
+    # ne bloque jamais le démarrage de l'API.
+    startCommand: npm run db:migrate && (npm run db:seed:demo -- --if-empty || true) && npm start
     healthCheckPath: /api/health/ready
     envVars:
       - key: NODE_VERSION
@@ -46,12 +47,6 @@ services:
         value: 8h
       - key: TRUST_PROXY_HOPS
         value: 1
-      # À saisir dans le dashboard Render au premier déploiement (non stockés dans Git)
-      - key: ADMIN_FIRST_NAME
-        sync: false
-      - key: ADMIN_LAST_NAME
-        sync: false
-      - key: ADMIN_EMAIL
-        sync: false
-      - key: ADMIN_PASSWORD
-        sync: false
+      # Données de démonstration (boutique générale). Supprimer cette variable pour désactiver.
+      - key: SEED_DEMO
+        value: true

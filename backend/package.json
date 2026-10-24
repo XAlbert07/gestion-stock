@@ -13,6 +13,7 @@
     "check": "npm run lint && npm run format:check && npm test",
     "db:migrate": "node scripts/migrate.js",
     "db:seed": "node scripts/seed.js",
+    "db:seed:demo": "node scripts/seed-demo.js",
     "bootstrap:admin": "node scripts/bootstrap-admin.js"
   },
   "keywords": [],
