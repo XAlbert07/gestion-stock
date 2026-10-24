@@ -27,6 +27,7 @@ export function AppShell() {
   const user = auth.user
   if (auth.status !== 'authenticated' || !user) return null
   const { signOut } = auth
+  const isDemo = user.role === 'DEMO'
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -43,7 +44,7 @@ export function AppShell() {
               </p>
               <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
-            <Badge variant="secondary">{user.role}</Badge>
+            <Badge variant="secondary">{isDemo ? 'Démo' : user.role}</Badge>
             <Button
               variant="ghost"
               size="icon"
@@ -56,6 +57,11 @@ export function AppShell() {
           </div>
         </div>
       </header>
+      {isDemo && (
+        <div role="status" className="border-b bg-warning/15 px-5 py-2.5 text-center text-sm sm:px-8">
+          <strong className="font-semibold">Mode démonstration</strong> : les données sont fictives et les modifications sont désactivées (lecture seule).
+        </div>
+      )}
       <div className="mx-auto grid max-w-7xl gap-6 p-4 sm:p-8 lg:grid-cols-[220px_1fr]">
         <nav aria-label="Navigation principale" className="rounded-lg border bg-card p-3">
           <ul className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-1">

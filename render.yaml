@@ -12,9 +12,10 @@ services:
     rootDir: backend
     buildCommand: npm ci
     # Migrations à chaque démarrage. Le seed de démonstration ne s'exécute que si
-    # SEED_DEMO=true ET que la base ne contient aucun produit ; un échec du seed
-    # ne bloque jamais le démarrage de l'API.
-    startCommand: npm run db:migrate && (npm run db:seed:demo -- --if-empty || true) && npm start
+    # SEED_DEMO=true ET que la base ne contient aucun produit. Le compte visiteur
+    # (lecture seule) est créé si DEMO_LOGIN_ENABLED=true. Un échec de l'un ou de
+    # l'autre ne bloque jamais le démarrage de l'API.
+    startCommand: npm run db:migrate && (npm run db:seed:demo -- --if-empty || true) && (npm run bootstrap:demo || true) && npm start
     healthCheckPath: /api/health/ready
     envVars:
       - key: NODE_VERSION
@@ -49,4 +50,8 @@ services:
         value: 1
       # Données de démonstration (boutique générale). Supprimer cette variable pour désactiver.
       - key: SEED_DEMO
+        value: true
+      # Bouton « Explorer la démo » : connexion en un clic à un compte en lecture seule.
+      # Supprimer cette variable pour désactiver la démo.
+      - key: DEMO_LOGIN_ENABLED
         value: true

@@ -1,12 +1,45 @@
-import { useState, type FormEvent } from 'react'
-import { ArrowRight, Boxes, LoaderCircle } from 'lucide-react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { ArrowRight, Boxes, Eye, LoaderCircle } from 'lucide-react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/auth/auth-context'
-import { getLoginError } from '@/lib/api'
+import { apiRequest, getLoginError } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+
+type DemoState = 'checking' | 'available' | 'unavailable'
+
+// Vérifie si la démo est proposée par le serveur. L'API gratuite peut mettre environ
+// une minute à se réveiller : on réessaie quelques fois avant d'abandonner, et cet
+// appel sert aussi à la réveiller avant que le visiteur ne clique.
+function useDemoAvailability(): DemoState {
+  const [state, setState] = useState<DemoState>('checking')
+
+  useEffect(() => {
+    let active = true
+    let timer: ReturnType<typeof setTimeout> | undefined
+
+    async function check(attempt: number) {
+      try {
+        const { enabled } = await apiRequest<{ enabled: boolean }>('/auth/demo', { token: null })
+        if (active) setState(enabled ? 'available' : 'unavailable')
+      } catch {
+        if (!active) return
+        if (attempt >= 6) setState('unavailable')
+        else timer = setTimeout(() => void check(attempt + 1), 5000)
+      }
+    }
+
+    void check(1)
+    return () => {
+      active = false
+      if (timer) clearTimeout(timer)
+    }
+  }, [])
+
+  return state
+}
 
 export function LoginPage() {
   const auth = useAuth()
@@ -16,6 +49,8 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [demoSubmitting, setDemoSubmitting] = useState(false)
+  const demo = useDemoAvailability()
 
   if (auth.status === 'authenticated') return <Navigate to="/app" replace />
 
@@ -33,6 +68,21 @@ export function LoginPage() {
       setSubmitting(false)
     }
   }
+
+  async function handleDemo() {
+    setError('')
+    setDemoSubmitting(true)
+    try {
+      await auth.signInDemo()
+      navigate('/app', { replace: true })
+    } catch (demoError) {
+      setError(demoError instanceof Error ? demoError.message : 'La démo est indisponible.')
+    } finally {
+      setDemoSubmitting(false)
+    }
+  }
+
+  const busy = submitting || demoSubmitting
 
   return (
     <main className="grid min-h-screen bg-background lg:grid-cols-[1fr_1fr]">
@@ -57,17 +107,32 @@ export function LoginPage() {
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="email">Adresse e-mail</Label>
-                <Input id="email" type="email" autoComplete="username" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nom@entreprise.com" disabled={submitting} />
+                <Input id="email" type="email" autoComplete="username" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="nom@entreprise.com" disabled={busy} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Mot de passe</Label>
-                <Input id="password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Votre mot de passe" disabled={submitting} />
+                <Input id="password" type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Votre mot de passe" disabled={busy} />
               </div>
               {error && <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2.5 text-sm text-destructive">{error}</p>}
-              <Button className="w-full" type="submit" disabled={submitting}>
+              <Button className="w-full" type="submit" disabled={busy}>
                 {submitting ? <><LoaderCircle className="animate-spin" size={17} />Connexion…</> : <>Se connecter<ArrowRight size={17} /></>}
               </Button>
             </form>
+            {demo !== 'unavailable' && (
+              <div className="mt-6 space-y-3 border-t pt-6">
+                <p className="text-center text-sm text-muted-foreground">Vous visitez ce projet ?</p>
+                {demo === 'available' ? (
+                  <Button className="w-full" type="button" variant="outline" onClick={handleDemo} disabled={busy}>
+                    {demoSubmitting ? <><LoaderCircle className="animate-spin" size={17} />Ouverture de la démo…</> : <><Eye size={17} />Explorer la démo</>}
+                  </Button>
+                ) : (
+                  <Button className="w-full" type="button" variant="outline" disabled>
+                    <LoaderCircle className="animate-spin" size={17} />Préparation de la démo…
+                  </Button>
+                )}
+                <p className="text-center text-xs leading-5 text-muted-foreground">Sans compte, en lecture seule, avec des données fictives. Le premier chargement peut prendre une minute.</p>
+              </div>
+            )}
             <p className="mt-6 text-center text-xs leading-5 text-muted-foreground">L’accès est réservé aux comptes créés par l’administrateur.</p>
           </CardContent>
         </Card>

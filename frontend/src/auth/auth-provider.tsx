@@ -44,6 +44,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ status: "authenticated", user: result.user });
   }, []);
 
+  // Connexion en un clic au compte visiteur (lecture seule), sans identifiants.
+  const signInDemo = useCallback(async () => {
+    const result = await apiRequest<LoginResponse>("/auth/demo", {
+      method: "POST",
+      token: null,
+    });
+    saveSessionToken(result.token);
+    setToken(result.token);
+    setState({ status: "authenticated", user: result.user });
+  }, []);
+
   useEffect(() => {
     if (!token) return;
     let active = true;
@@ -60,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [signOut, token]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, token, signIn, signOut }),
-    [state, token, signIn, signOut],
+    () => ({ ...state, token, signIn, signInDemo, signOut }),
+    [state, token, signIn, signInDemo, signOut],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

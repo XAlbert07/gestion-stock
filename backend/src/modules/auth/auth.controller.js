@@ -14,4 +14,18 @@ async function me(req, res, next) {
     next(error);
   }
 }
-module.exports = { signIn, me };
+async function demoStatus(req, res, next) {
+  try {
+    res.json(await service.getDemoStatus());
+  } catch (error) {
+    next(error);
+  }
+}
+async function demoSignIn(req, res, next) {
+  try {
+    res.json(await service.loginDemo());
+  } catch (error) {
+    next(error);
+  }
+}
+module.exports = { signIn, me, demoStatus, demoSignIn };

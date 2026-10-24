@@ -8,7 +8,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 
 const authValue: AuthContextValue = {
-  status: 'authenticated', user: { id: '9', first_name: 'Test', last_name: 'User', email: 'test@example.com', role: 'ADMIN' }, token: 'catalog-test-token', signIn: vi.fn(async () => {}), signOut: vi.fn(),
+  status: 'authenticated', user: { id: '9', first_name: 'Test', last_name: 'User', email: 'test@example.com', role: 'ADMIN' }, token: 'catalog-test-token', signIn: vi.fn(async () => {}), signInDemo: vi.fn(async () => {}), signOut: vi.fn(),
 }
 
 function installApi(handler: (input: RequestInfo | URL, init?: RequestInit) => unknown) {

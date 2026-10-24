@@ -16,6 +16,7 @@ export type AuthState =
 export type AuthContextValue = AuthState & {
   token: string | null
   signIn: (email: string, password: string) => Promise<void>
+  signInDemo: () => Promise<void>
   signOut: () => void
 }
 

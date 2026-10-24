@@ -18,6 +18,7 @@ const authValue: AuthContextValue = {
   },
   token: "stock-test-token",
   signIn: vi.fn(async () => {}),
+  signInDemo: vi.fn(async () => {}),
   signOut: vi.fn(),
 };
 

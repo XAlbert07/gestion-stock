@@ -23,6 +23,7 @@ const authValue: AuthContextValue = {
   },
   token: "test-session-token",
   signIn: vi.fn(async () => {}),
+  signInDemo: vi.fn(async () => {}),
   signOut: vi.fn(),
 };
 

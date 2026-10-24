@@ -14,7 +14,8 @@
     "db:migrate": "node scripts/migrate.js",
     "db:seed": "node scripts/seed.js",
     "db:seed:demo": "node scripts/seed-demo.js",
-    "bootstrap:admin": "node scripts/bootstrap-admin.js"
+    "bootstrap:admin": "node scripts/bootstrap-admin.js",
+    "bootstrap:demo": "node scripts/bootstrap-demo-user.js"
   },
   "keywords": [],
   "author": "",
