@@ -4,6 +4,23 @@ require("dotenv").config({ path: path.resolve(__dirname, "../../.env"), quiet: t
 
 const requiredDatabaseVariables = ["DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"];
 
+// DB_SSL=true active la connexion chiffrée (obligatoire chez Neon, Supabase, etc.).
+// Le certificat du serveur est vérifié. Toute autre valeur que true/false est refusée
+// pour ne jamais retomber silencieusement sur une connexion non chiffrée.
+function getDatabaseSsl() {
+  const raw = (process.env.DB_SSL || "").trim().toLowerCase();
+
+  if (raw === "" || raw === "false") {
+    return undefined;
+  }
+
+  if (raw === "true") {
+    return { rejectUnauthorized: true };
+  }
+
+  throw new Error("DB_SSL doit valoir true ou false.");
+}
+
 function getDatabaseConfig() {
   const missing = requiredDatabaseVariables.filter((name) => !process.env[name]);
 
@@ -19,12 +36,15 @@ function getDatabaseConfig() {
     throw new Error("DB_PORT doit être un numéro de port valide.");
   }
 
+  const ssl = getDatabaseSsl();
+
   return {
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    port
+    port,
+    ...(ssl ? { ssl } : {})
   };
 }
 

@@ -1,9 +1,6 @@
-databases:
-  - name: gestion-stock-db
-    plan: free
-    databaseName: gestion_stock
-    user: gestion_stock_user
-
+# API Express hébergée sur Render. La base PostgreSQL est hébergée chez Neon
+# (plan gratuit permanent) : ses paramètres de connexion se saisissent dans le
+# dashboard Render (variables marquées sync: false), jamais dans ce fichier.
 services:
   - type: web
     name: gestion-stock-api
@@ -11,37 +8,32 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm ci
-    # Migrations à chaque démarrage. Le seed de démonstration ne s'exécute que si
-    # SEED_DEMO=true ET que la base ne contient aucun produit. Le compte visiteur
-    # (lecture seule) est créé si DEMO_LOGIN_ENABLED=true. Un échec de l'un ou de
-    # l'autre ne bloque jamais le démarrage de l'API.
-    startCommand: npm run db:migrate && (npm run db:seed:demo -- --if-empty || true) && (npm run bootstrap:demo || true) && npm start
+    # start:render enchaîne, à chaque démarrage : migrations, création de
+    # l'administrateur (si ADMIN_PASSWORD est défini), création du compte visiteur
+    # (si DEMO_LOGIN_ENABLED=true) et données de démonstration (si SEED_DEMO=true et
+    # base sans produit). Voir backend/package.json.
+    startCommand: npm run start:render
     healthCheckPath: /api/health/ready
     envVars:
       - key: NODE_VERSION
         value: 22
       - key: NODE_ENV
         value: production
+      # --- Base PostgreSQL (Neon) ---
       - key: DB_HOST
-        fromDatabase:
-          name: gestion-stock-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: gestion-stock-db
-          property: port
+        sync: false
       - key: DB_NAME
-        fromDatabase:
-          name: gestion-stock-db
-          property: database
+        sync: false
       - key: DB_USER
-        fromDatabase:
-          name: gestion-stock-db
-          property: user
+        sync: false
       - key: DB_PASSWORD
-        fromDatabase:
-          name: gestion-stock-db
-          property: password
+        sync: false
+      - key: DB_PORT
+        value: 5432
+      # Connexion chiffrée obligatoire chez Neon
+      - key: DB_SSL
+        value: true
+      # --- Application ---
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES_IN
@@ -55,3 +47,6 @@ services:
       # Supprimer cette variable pour désactiver la démo.
       - key: DEMO_LOGIN_ENABLED
         value: true
+      # Pour (re)créer le compte administrateur : ajouter dans le dashboard
+      # ADMIN_FIRST_NAME, ADMIN_LAST_NAME, ADMIN_EMAIL et ADMIN_PASSWORD (12 caractères
+      # minimum), laisser redémarrer, puis supprimer ADMIN_PASSWORD.

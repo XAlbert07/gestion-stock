@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "start:render": "npm run db:migrate && (npm run bootstrap:admin -- --if-configured || true) && (npm run bootstrap:demo || true) && (npm run db:seed:demo -- --if-empty || true) && npm start",
     "test": "jest --runInBand",
     "lint": "eslint .",
     "format": "prettier --write \"{src,tests,scripts}/**/*.js\"",

@@ -5,6 +5,12 @@ const { getDatabaseConfig } = require("../src/config/environment");
 const required = ["ADMIN_FIRST_NAME", "ADMIN_LAST_NAME", "ADMIN_EMAIL", "ADMIN_PASSWORD"];
 
 async function run() {
+  // Mode démarrage automatique : ne fait rien tant que ADMIN_PASSWORD n'est pas défini.
+  if (process.argv.includes("--if-configured") && !process.env.ADMIN_PASSWORD) {
+    console.log("Administrateur ignoré (ADMIN_PASSWORD non défini).");
+    return;
+  }
+
   const missing = required.filter((name) => !process.env[name]);
   if (missing.length)
     throw new Error(`Variables administrateur manquantes : ${missing.join(", ")}`);
